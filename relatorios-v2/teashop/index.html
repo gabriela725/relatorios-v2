@@ -197,28 +197,55 @@ const SID='1pAWQc6th_5QZd3-kqenEUz1AbC19CoQRsCorxGEWy9I'; // usando export diret
 const B='https://docs.google.com/spreadsheets/d/1pAWQc6th_5QZd3-kqenEUz1AbC19CoQRsCorxGEWy9I/gviz/tq?tqx=out:csv&gid=';
 const G={img:'1069471635',results:'1950737514',publicos:'227161514',anuncios:'1146517591',advMeta:'1732779708'};
 let CH={},DATA={},periodMode='semana';
-const N=v=>{if(!v||v==='#DIV/0!'||v==='-'||v===''||v==='NaN')return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n;};
+const N=v=>{
+  if(v===null||v===undefined)return null;
+  let s=String(v).trim();
+  if(!s||s==='#DIV/0!'||s==='-'||s==='NaN'||s==='#N/A'||s==='#REF!')return null;
+  s=s.replace(/R\$\s*/g,'');
+  s=s.replace(/\./g,'');
+  s=s.replace(',','.');
+  s=s.replace('%','').trim();
+  if(!s)return null;
+  const n=parseFloat(s);
+  return isNaN(n)?null:n;
+};
 const R=(v,d=0)=>v===null||v===undefined?'--':'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const P=v=>v===null?'--':(v*100).toFixed(1)+'%';
 const RK=i=>['rk-1','rk-2','rk-3'][i]||'rk-n';
 const SB=s=>s==='Ativo'?'<span class="badge b-g">Ativo</span>':s==='Desativado'?'<span class="badge b-gray">Pausado</span>':s?'<span class="badge b-gold">'+s+'</span>':'';
 function csv(gid){return new Promise((ok,err)=>Papa.parse(B+gid,{download:true,complete:r=>ok(r.data),error:err,skipEmptyLines:false}));}
 function goTab(i){document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',i===j));}
-function parseImg(rows){const m={};let hi=rows.findIndex(r=>r[0]&&r[0].toLowerCase().includes('ad'));if(hi<0)hi=0;for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(!r[0])continue;m[r[0].trim()]={img:(r[1]||'').trim(),vid:(r[2]||'').trim()};}return m;}
+function parseImg(rows){
+  const m={};
+  let hi=rows.findIndex(r=>r[0]&&(r[0].toLowerCase()==='nome'||r[0].toLowerCase()==='ad_name'||r[0].toLowerCase()==='ad name'));
+  if(hi<0)hi=0;
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i];
+    if(!r[0])continue;
+    const img=(r[1]||'').trim();
+    const vid=(r[2]||'').trim();
+    // Se imagem_url tem link instagram e não tem video_url, usa como video
+    const finalImg=img&&!img.includes('instagram.com')&&!img.includes('facebook.com')?img:'';
+    const finalVid=vid||((img.includes('instagram.com')||img.includes('facebook.com'))?img:'');
+    m[r[0].trim()]={img:finalImg,vid:finalVid};
+  }
+  return m;
+}
 function parseResults(rows){
   const sem=[],mes=[];let onSem=false;
   for(const r of rows){
     if(r[0]==='Semana'){onSem=true;continue;}
-    if(onSem){if(!r[0]||r[0]==='Total'||r[0]==='Campanhas'){onSem=false;}else{const inv=N(r[1]);if(inv!==null)sem.push({label:r[0],inv,cli:N(r[2]),cpc:N(r[3]),txc:N(r[4]),pago:N(r[5]),org:N(r[6]),leads:N(r[7]),cpl:N(r[8]),txMql:N(r[9]),mql:N(r[10]),cmql:N(r[11]),rv:N(r[12]),cprv:N(r[13]),sql:N(r[14]),cpsql:N(r[15])});}}
+    if(onSem){if(!r[0]||r[0]==='Total'||r[0]==='Campanhas'){onSem=false;}else{const inv=N(r[1]);if(inv!==null)const txMqlRaw=N(r[9]);sem.push({label:r[0],inv,cli:N(r[2]),cpc:N(r[3]),txc:N(r[4]),pago:N(r[5]),org:N(r[6]),leads:N(r[7]),cpl:N(r[8]),txMql:txMqlRaw!==null?(txMqlRaw>1?txMqlRaw/100:txMqlRaw):null,mql:N(r[10]),cmql:N(r[11]),rv:N(r[12]),cprv:N(r[13]),sql:N(r[14]),cpsql:N(r[15])});}}
     if(r[20]==='Mes'||r[20]==='Mes'){continue;}
     if(r[20]&&r[20]!=='Mes'&&r[20]!=='Total'&&r[20]!=='Semana'&&r[20]!=='Periodo'){const inv=N(r[21]);if(inv!==null&&inv>0)mes.push({label:r[20],inv,cli:N(r[22]),cpc:N(r[23]),txc:N(r[24]),pago:N(r[25]),org:N(r[26]),leads:N(r[27]),cpl:N(r[28]),txMql:N(r[29]),mql:N(r[30]),cmql:N(r[31]),rv:N(r[32]),cprv:N(r[33]),sql:N(r[34]),cpsql:null});}
   }
   const t=rows.find(r=>r[0]==='Total');
-  const total=t?{inv:N(t[1]),cli:N(t[2]),cpc:N(t[3]),leads:N(t[7]),cpl:N(t[8]),txMql:N(t[9]),mql:N(t[10]),cmql:N(t[11]),rv:N(t[12]),cprv:N(t[13]),sql:N(t[14])}:{};
+  const txMqlT=t?N(t[9]):null;
+  const total=t?{inv:N(t[1]),cli:N(t[2]),cpc:N(t[3]),leads:N(t[7]),cpl:N(t[8]),txMql:txMqlT!==null?(txMqlT>1?txMqlT/100:txMqlT):null,mql:N(t[10]),cmql:N(t[11]),rv:N(t[12]),cprv:N(t[13]),sql:N(t[14])}:{};
   return{sem,mes,total};
 }
-function parsePub(rows){const r=[];let on=false;for(const row of rows){if(row[0]==='Adset Name'){on=true;continue;}if(!on)continue;if(!row[0]||row[0]==='Total'||row[0]==='Periodo'){on=false;continue;}const inv=N(row[1]);if(!inv||inv===0)continue;r.push({nome:row[0],inv,pct:N(row[2]),cpc:N(row[3]),ctr:N(row[4]),leads:N(row[5]),cpl:N(row[6]),mql:N(row[7]),txQ:N(row[8]),cmql:N(row[9]),rv:N(row[10]),cprv:N(row[11])});}return r;}
-function parseAds(rows){const r=[];let on=false;for(const row of rows){if(row[0]==='Ad Name'){on=true;continue;}if(!on)continue;if(!row[0]||row[0]==='Total'||row[0]==='Periodo'){on=false;continue;}const inv=N(row[1]);if(!inv||inv===0)continue;r.push({nome:row[0],inv,pct:N(row[2]),cpc:N(row[3]),ctr:N(row[4]),leads:N(row[5]),cpl:N(row[6]),mql:N(row[7]),txMql:N(row[8]),cmql:N(row[9]),rv:N(row[10]),status:(row[15]||'').trim()});}return r;}
+function parsePub(rows){const r=[];let on=false;for(const row of rows){if(row[0]==='Adset Name'){on=true;continue;}if(!on)continue;if(!row[0]||row[0]==='Total'||row[0]==='Periodo'){on=false;continue;}const inv=N(row[1]);if(inv===null)continue;const txQR=N(row[8]);r.push({nome:row[0],inv,pct:N(row[2]),cpc:N(row[3]),ctr:N(row[4]),leads:N(row[5]),cpl:N(row[6]),mql:N(row[7]),txQ:txQR!==null?(txQR>1?txQR/100:txQR):null,cmql:N(row[9]),rv:N(row[10]),cprv:N(row[11])});}return r;}
+function parseAds(rows){const r=[];let on=false;for(const row of rows){if(row[0]==='Ad Name'){on=true;continue;}if(!on)continue;if(!row[0]||row[0]==='Total'||row[0]==='Periodo'){on=false;continue;}const inv=N(row[1]);if(inv===null)continue;const txMqlA=N(row[8]);r.push({nome:row[0],inv,pct:N(row[2]),cpc:N(row[3]),ctr:N(row[4]),leads:N(row[5]),cpl:N(row[6]),mql:N(row[7]),txMql:txMqlA!==null?(txMqlA>1?txMqlA/100:txMqlA):null,cmql:N(row[9]),rv:N(row[10]),status:(row[16]||row[15]||'').trim()});}return r;}
 function parseCamp(rows){const map={};for(const r of rows){const camp=r[1];const spend=N(r[4]);if(!camp||!spend||camp==='Campaign Name')continue;if(!map[camp])map[camp]={nome:camp,inv:0,leads:0,mql:0,sql:0,rv:0,imp:0,clk:0};const m=map[camp];m.inv+=spend;m.leads+=N(r[5])||0;m.mql+=N(r[11])||0;m.sql+=N(r[12])||0;m.rv+=N(r[20])||0;m.imp+=N(r[7])||0;m.clk+=N(r[8])||0;}return Object.values(map).filter(c=>c.inv>0).map(c=>({...c,cpl:c.leads?c.inv/c.leads:null,ctr:c.imp?c.clk/c.imp:null,txMql:c.leads?c.mql/c.leads:null,cmql:c.mql?c.inv/c.mql:null,cprv:c.rv?c.inv/c.rv:null})).sort((a,b)=>b.inv-a.inv);}
 function parseCombo(rows){const map={};for(const r of rows){const pub=r[2];const ad=r[3];const spend=N(r[4]);if(!pub||!ad||!spend||pub==='Adset Name')continue;const key=pub+'|||'+ad;if(!map[key])map[key]={pub,ad,inv:0,leads:0,mql:0,rv:0};const m=map[key];m.inv+=spend;m.leads+=N(r[5])||0;m.mql+=N(r[11])||0;m.rv+=N(r[20])||0;}return Object.values(map).filter(c=>c.leads>0).map(c=>({...c,cpl:c.leads?c.inv/c.leads:null,txMql:c.leads?c.mql/c.leads:null})).sort((a,b)=>(a.cpl||999)-(b.cpl||999));}
 function mediaHTML(nome,imgMap){const m=imgMap[nome]||{};if(m.vid){const isIg=m.vid.includes('instagram.com');const thumb=m.img?'<img src="'+m.img+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=none">':'';return'<div class="dest-media">'+thumb+'<div class="play-ov"><a href="'+m.vid+'" target="_blank" rel="noopener" class="play-btn">&#9654;</a><span class="play-lbl">'+(isIg?'Instagram':'Video')+'</span></div></div>';}if(m.img)return'<div class="dest-media"><img src="'+m.img+'" onerror="this.style.display=\'none\'"></div>';return'<div class="dest-media" style="background:#f0ede6;"><div class="no-img">Sem midia</div></div>';}
