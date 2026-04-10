@@ -235,7 +235,7 @@ function parseResults(rows){
   const sem=[],mes=[];let onSem=false;
   for(const r of rows){
     if(r[0]==='Semana'){onSem=true;continue;}
-    if(onSem){if(!r[0]||r[0]==='Total'||r[0]==='Campanhas'){onSem=false;}else{const inv=N(r[1]);if(inv!==null)const txMqlRaw=N(r[9]);sem.push({label:r[0],inv,cli:N(r[2]),cpc:N(r[3]),txc:N(r[4]),pago:N(r[5]),org:N(r[6]),leads:N(r[7]),cpl:N(r[8]),txMql:txMqlRaw!==null?(txMqlRaw>1?txMqlRaw/100:txMqlRaw):null,mql:N(r[10]),cmql:N(r[11]),rv:N(r[12]),cprv:N(r[13]),sql:N(r[14]),cpsql:N(r[15])});}}
+    if(onSem){if(!r[0]||r[0]==='Total'||r[0]==='Campanhas'){onSem=false;}else{const inv=N(r[1]);if(inv!==null){const txMqlRaw=N(r[9]);sem.push({label:r[0],inv,cli:N(r[2]),cpc:N(r[3]),txc:N(r[4]),pago:N(r[5]),org:N(r[6]),leads:N(r[7]),cpl:N(r[8]),txMql:txMqlRaw!==null?(txMqlRaw>1?txMqlRaw/100:txMqlRaw):null,mql:N(r[10]),cmql:N(r[11]),rv:N(r[12]),cprv:N(r[13]),sql:N(r[14]),cpsql:N(r[15])});}}}
     if(r[20]==='Mes'||r[20]==='Mes'){continue;}
     if(r[20]&&r[20]!=='Mes'&&r[20]!=='Total'&&r[20]!=='Semana'&&r[20]!=='Periodo'){const inv=N(r[21]);if(inv!==null&&inv>0)mes.push({label:r[20],inv,cli:N(r[22]),cpc:N(r[23]),txc:N(r[24]),pago:N(r[25]),org:N(r[26]),leads:N(r[27]),cpl:N(r[28]),txMql:N(r[29]),mql:N(r[30]),cmql:N(r[31]),rv:N(r[32]),cprv:N(r[33]),sql:N(r[34]),cpsql:null});}
   }
