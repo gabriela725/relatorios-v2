@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logos BR · Dashboard de Performance</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F2EE;--bg2:#FFFFFF;--bg3:#F0EDE8;--bg4:#E8E4DC;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--text:#1A1714;--text2:#6B6560;--text3:#9E9890;--gold:#B8742A;--gold-pale:rgba(184,116,42,0.10);--teal:#1E9E98;--teal-pale:rgba(30,158,152,0.10);--coral:#C04E30;--coral-pale:rgba(192,78,48,0.10);--green:#2E9E62;--green-pale:rgba(46,158,98,0.10);--blue:#2B72CC;--blue-pale:rgba(43,114,204,0.10);--font:'Sora',sans-serif;--serif:'Lora',Georgia,serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.5;min-height:100vh;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:18px;}
+.logo{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--text);}
+.logo span{color:var(--gold);}
+.divider-v{width:1px;height:20px;background:var(--border2);}
+.topbar-badge{display:flex;align-items:center;gap:6px;background:var(--blue-pale);border:1px solid rgba(91,155,240,0.2);color:var(--blue);font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.06em;}
+.topbar-badge svg{width:12px;height:12px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.period-badge{background:var(--gold-pale);border:1px solid rgba(232,160,69,0.22);color:var(--gold);font-size:11px;padding:4px 12px;border-radius:20px;font-weight:500;}
+.refresh-btn{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:var(--font);transition:all .15s;}
+.refresh-btn:hover{background:var(--bg4);color:var(--text);}
+.refresh-btn svg{width:12px;height:12px;}
+.last-update{font-size:10px;color:var(--text3);}
+.date-picker-wrap{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:4px 12px;}
+.date-picker-wrap label{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;}
+.date-picker-wrap input[type="date"]{font-family:var(--font);font-size:11px;color:var(--text);background:transparent;border:none;outline:none;cursor:pointer;padding:0;}
+.date-picker-wrap input[type="date"]::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer;width:12px;height:12px;}
+.date-sep{font-size:11px;color:var(--text3);}
+.apply-btn{display:flex;align-items:center;gap:5px;background:var(--gold);border:none;color:#fff;font-size:11px;font-weight:600;padding:5px 13px;border-radius:20px;cursor:pointer;font-family:var(--font);transition:opacity .15s;}
+.apply-btn:hover{opacity:.85;}
+.apply-btn svg{width:11px;height:11px;}
+.period-mode{font-size:10px;color:var(--text3);display:none;}
+.period-mode.custom{display:inline;color:var(--teal);}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;transition:opacity .4s;}
+.loading-overlay.hidden{opacity:0;pointer-events:none;}
+.loading-spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12px;color:var(--text3);}
+.error-box{background:var(--coral-pale);border:1px solid rgba(192,78,48,.25);border-radius:10px;padding:16px 20px;margin:24px 28px;font-size:13px;color:var(--coral);display:none;}
+.error-box.show{display:block;}
+.tabs{display:flex;gap:2px;padding:0 28px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.tab{font-size:12px;font-weight:500;color:var(--text3);padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.main{padding:24px 28px;display:none;}
+.main.active{display:block;}
+.row{display:grid;gap:14px;margin-bottom:14px;}
+.r6{grid-template-columns:repeat(6,1fr);}
+.r4{grid-template-columns:repeat(4,1fr);}
+.r3{grid-template-columns:repeat(3,1fr);}
+.r2{grid-template-columns:1fr 1fr;}
+.r21{grid-template-columns:2fr 1fr;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;animation:fadeUp .35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.16s}.card:nth-child(5){animation-delay:.20s}.card:nth-child(6){animation-delay:.24s}
+.card-label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);font-weight:500;margin-bottom:8px;}
+.kpi{position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;}
+.kpi.gold::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.kpi.teal::before{background:linear-gradient(90deg,var(--teal),transparent);}
+.kpi.coral::before{background:linear-gradient(90deg,var(--coral),transparent);}
+.kpi.green::before{background:linear-gradient(90deg,var(--green),transparent);}
+.kpi.blue::before{background:linear-gradient(90deg,var(--blue),transparent);}
+.kv{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1;margin-bottom:5px;}
+.kpi.gold .kv{color:var(--gold)}.kpi.teal .kv{color:var(--teal)}.kpi.green .kv{color:var(--green)}.kpi.coral .kv{color:var(--coral)}.kpi.blue .kv{color:var(--blue)}
+.ks{font-size:11px;color:var(--text2);}.ks b{color:var(--text);font-weight:500;}
+.ksplit{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.ksplit-item{flex:1;}
+.ksplit-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;}
+.ksplit-val{font-size:13px;font-weight:600;color:var(--text);}
+.roas-strip{display:grid;grid-template-columns:1fr 1fr;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.roas-item{padding:20px;border-right:1px solid var(--border);text-align:center;}
+.roas-item:last-child{border-right:none;}
+.roas-big{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1;margin-bottom:4px;}
+.roas-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);font-weight:500;margin-bottom:2px;}
+.roas-note{font-size:10px;color:var(--text2);margin-top:4px;}
+.ctable{width:100%;border-collapse:collapse;}
+.ctable thead th{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);font-weight:500;padding:0 12px 10px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.ctable thead th:not(:first-child){text-align:right;}
+.ctable thead th:hover{color:var(--text2);}
+.ctable tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+.ctable tbody tr:last-child{border-bottom:none;}
+.ctable tbody tr:hover{background:var(--bg3);}
+.ctable tbody tr.excluida{opacity:.4;}
+.ctable tbody td{padding:10px 12px;font-size:12px;color:var(--text2);}
+.ctable tbody td:not(:first-child){text-align:right;}
+.ctable tbody td.name{color:var(--text);font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ctable tbody td.fat{color:var(--text);font-weight:600;font-family:var(--serif);}
+.ctable tfoot td{padding:10px 12px;font-size:12px;font-weight:600;color:var(--text);background:var(--bg3);border-top:1px solid var(--border2);}
+.ctable tfoot td:not(:first-child){text-align:right;}
+.pill{display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;min-width:52px;}
+.pill-hi{background:var(--green-pale);color:var(--green);}
+.pill-mid{background:var(--gold-pale);color:var(--gold);}
+.pill-lo{background:var(--coral-pale);color:var(--coral);}
+.pill-na{background:var(--bg3);color:var(--text3);}
+.type-badge{font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;margin-right:2px;}
+.type-a{background:var(--gold-pale);color:var(--gold);}
+.type-m{background:var(--teal-pale);color:var(--teal);}
+.type-3{background:var(--blue-pale);color:var(--blue);}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.mrow:last-child{border-bottom:none;}
+.mrow-key{font-size:12px;color:var(--text2);}
+.mrow-val{font-size:13px;font-weight:600;color:var(--text);}
+.mrow-val.gold{color:var(--gold)}.mrow-val.teal{color:var(--teal)}.mrow-val.green{color:var(--green)}.mrow-val.coral{color:var(--coral)}
+.nota-excl{background:rgba(192,78,48,0.05);border:1px solid rgba(192,78,48,0.18);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text2);margin-bottom:14px;display:flex;gap:8px;}
+.nota-excl strong{color:var(--coral);}
+.insight{border-radius:8px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;margin-top:12px;}
+.insight-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+.insight p{font-size:12px;color:var(--text2);line-height:1.6;}
+.insight strong{font-weight:500;}
+.insight.gold{background:rgba(184,116,42,.06);border:1px solid rgba(184,116,42,.16);}.insight.gold p strong{color:var(--gold);}
+.insight.teal{background:rgba(30,158,152,.05);border:1px solid rgba(30,158,152,.16);}.insight.teal p strong{color:var(--teal);}
+.insight.warn{background:rgba(192,78,48,.05);border:1px solid rgba(192,78,48,.16);}.insight.warn p strong{color:var(--coral);}
+.assins-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.assin-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+.assin-val{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1;margin-bottom:4px;}
+.assin-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-weight:500;}
+.donut-item{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.donut-item:last-child{margin-bottom:0;}
+.donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.donut-name{flex:1;font-size:12px;color:var(--text2);}
+.donut-pct{font-size:12px;font-weight:600;color:var(--text);}
+.donut-val{font-size:10px;color:var(--text3);}
+.chart-wrap{position:relative;width:100%;}
+.legend{display:flex;gap:16px;margin-bottom:8px;font-size:11px;color:var(--text2);flex-wrap:wrap;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.ldot{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.camp-block{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.camp-block-header{padding:13px 18px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .15s;}
+.camp-block-header:hover{background:var(--bg4);}
+.camp-block-name{font-size:13px;font-weight:600;color:var(--text);}
+.camp-block-meta{display:flex;align-items:center;gap:12px;}
+.camp-block-body{display:none;padding:0 18px 16px;}
+.camp-block-body.open{display:block;}
+.camp-rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--gold-pale);color:var(--gold);font-size:10px;font-weight:600;margin-right:8px;flex-shrink:0;}
+
+.filter-bar{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
+.filter-btn{font-size:11px;font-weight:500;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s;}
+.filter-btn:hover{background:var(--bg3);color:var(--text);}
+.filter-btn.active{background:var(--gold-pale);border-color:rgba(184,116,42,0.3);color:var(--gold);font-weight:600;}
+.footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text3);}
+
+/* Date picker */
+.date-picker-wrap{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:4px 10px 4px 12px;}
+.date-picker-wrap label{font-size:10px;color:var(--text3);font-weight:500;white-space:nowrap;}
+.date-picker-wrap input[type=date]{background:none;border:none;font-family:var(--font);font-size:11px;color:var(--text);outline:none;cursor:pointer;width:110px;}
+.date-picker-wrap input[type=date]::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer;width:12px;height:12px;}
+.date-sep{font-size:10px;color:var(--text3);}
+.apply-btn{display:flex;align-items:center;gap:4px;background:var(--gold);color:#fff;border:none;font-family:var(--font);font-size:11px;font-weight:600;padding:5px 12px;border-radius:16px;cursor:pointer;transition:opacity .15s;white-space:nowrap;}
+.apply-btn:hover{opacity:.85;}
+.apply-btn svg{width:11px;height:11px;}
+.period-mode{font-size:10px;color:var(--text3);padding:2px 8px;border-radius:10px;background:var(--gold-pale);color:var(--gold);font-weight:600;display:none;}
+.period-mode.custom{display:inline-block;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando dados do Google Sheets…</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Logos <span>BR</span></div>
+    <div class="divider-v"></div>
+    <div class="topbar-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+      Google Ads · Guru
+    </div>
+    <div class="divider-v"></div>
+    <span style="font-size:11px;color:var(--text2)">Dashboard de Performance</span>
+  </div>
+  <div class="topbar-right">
+    <span class="last-update" id="lastUpdate">—</span>
+    <div class="date-picker-wrap">
+      <label>De</label>
+      <input type="date" id="dateFrom">
+      <span class="date-sep">→</span>
+      <label>Até</label>
+      <input type="date" id="dateTo">
+    </div>
+    <button class="apply-btn" onclick="applyCustomPeriod()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Aplicar
+    </button>
+    <span class="period-mode" id="periodMode">✦ período customizado</span>
+    <button class="refresh-btn" onclick="loadAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+      Atualizar
+    </button>
+    <span class="period-badge" id="periodBadge">—</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('periodo')">Período atual</div>
+  <div class="tab" onclick="showTab('historico')">Histórico mensal</div>
+  <div class="tab" onclick="showTab('adsets')">Campanhas · Grupos de anúncio</div>
+</div>
+
+<div class="error-box" id="errorBox"></div>
+
+<!-- PERÍODO ATUAL -->
+<div class="main active" id="tab-periodo">
+  <div class="filter-bar">
+    <span style="font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.06em;text-transform:uppercase;">Ver por período:</span>
+    <button class="filter-btn" onclick="setPeriodFilter(1)">Hoje</button>
+    <button class="filter-btn" onclick="setPeriodFilter(5)">5 dias</button>
+    <button class="filter-btn" onclick="setPeriodFilter(15)">15 dias</button>
+    <button class="filter-btn active" onclick="setPeriodFilter(0)">Período completo</button>
+  </div>
+    <div class="row r6" id="kpisRow"></div>
+  <div class="nota-excl" id="notaExcl" style="display:none"><span>⚠️</span><div id="notaExclText"></div></div>
+  <div class="row r21">
+    <div class="card">
+      <div class="card-label" id="campTableLabel">Campanhas: Investimento × Resultado</div>
+      <table class="ctable">
+        <thead><tr>
+          <th onclick="sortTable('nome')">Campanha</th>
+          <th onclick="sortTable('inv')">Investido</th>
+          <th onclick="sortTable('fatGads')">Fat. GAds</th>
+          <th onclick="sortTable('roasGads')">ROAS GAds</th>
+          <th onclick="sortTable('fatGuru')">Fat. Guru</th>
+          <th>Assin.</th>
+          <th onclick="sortTable('roasGuru')">ROAS Guru</th>
+        </tr></thead>
+        <tbody id="campBody"></tbody>
+        <tfoot id="campFoot"></tfoot>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-label">Distribuição do Investimento</div>
+      <canvas id="donutCanvas" width="110" height="110" style="display:block;margin:0 auto 16px;"></canvas>
+      <div id="donutLegend"></div>
+      <div id="searchInsight"></div>
+    </div>
+  </div>
+  <div class="roas-strip" id="roasStrip"></div>
+  <div class="row r2">
+    <div class="card">
+      <div class="card-label">Assinaturas Geradas</div>
+      <div class="assins-mini" id="assinsMini"></div>
+      <div id="assinDetails"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Destaques por Campanha</div>
+      <div id="destaques"></div>
+    </div>
+  </div>
+  <div class="row r2">
+    <div class="card" id="bestCampCard"></div>
+    <div class="card" id="consolidadoCard"></div>
+  </div>
+</div>
+
+<!-- HISTÓRICO -->
+<div class="main" id="tab-historico">
+  <div class="row r21">
+    <div class="card">
+      <div class="card-label">Faturamento Guru × Investimento — mensal</div>
+      <div class="legend">
+        <span><span class="ldot" style="background:#1D9E75"></span>Fat. Guru Assin.</span>
+        <span><span class="ldot" style="background:#E8A045"></span>Fat. GAds</span>
+        <span><span class="ldot" style="background:#5B9BF0;height:3px;border-radius:1px;"></span>Investimento</span>
+      </div>
+      <div class="chart-wrap" style="height:300px"><canvas id="histChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-label">ROAS Guru mensal</div>
+      <div class="chart-wrap" style="height:160px"><canvas id="roasChart"></canvas></div>
+      <div id="histTable" style="margin-top:14px;"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-label">Ranking de campanhas — histórico completo por faturamento Guru</div>
+    <div id="histCampRanking"></div>
+  </div>
+</div>
+
+<!-- ADSETS -->
+<div class="main" id="tab-adsets">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px;">Campanhas · Melhores grupos de anúncio</div>
+      <div style="font-size:12px;color:var(--text2);">Ordenado por faturamento Guru · Clique para expandir</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="refresh-btn" onclick="expandAll()">Expandir tudo</button>
+      <button class="refresh-btn" onclick="collapseAll()">Recolher tudo</button>
+    </div>
+  </div>
+  <div id="adsetsList"></div>
+</div>
+
+<div class="footer">
+  <span>Logos BR · Dashboard de Performance</span>
+  <span id="footerSource">Fonte: Google Sheets · atualização automática</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════
+const SHEET_ID  = '1v8uIvZFSOA55veUVHtFJmBNhSotziAWmgRhm89VIlfE';
+const GIDS = {
+  campanhas1: '797506830',
+  geral:      '1812228142',
+  strGads:    '1543442840',
+  guruAssin:  '1839129690',
+  gads:       '364042754',
+};
+const EXCLUIR = ['22316334459','23237243987'];
+const COLORS  = ['#E8A045','#3DBFB8','#7B5EA7','#5B9BF0','#C04E30','#2E9E62','#B8742A','#2B72CC'];
+
+// ══════════════════════════════════════════════════════════
+// HELPERS DE FORMATAÇÃO
+// ══════════════════════════════════════════════════════════
+const fmt  = (v,d=0) => v==null?'—':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtR = (v,d=0) => (v==null||v===0)?'—':'R$ '+fmt(v,d);
+const fmtX = v => (!v||v===0)?'—':fmt(v,2)+'×';
+const pill = v => {
+  if(!v||v===0) return '<span class="pill pill-na">—</span>';
+  const c = v>=8?'pill-hi':v>=3?'pill-mid':'pill-lo';
+  return `<span class="pill ${c}">${fmtX(v)}</span>`;
+};
+const shortName = s => (s||'')
+  .replace(/^pmax-vendas?-?|^search-vendas?-?|^demandgen-/,'')
+  .replace(/-\d{2}-\d{2}-\d{4}|-\d{2}-\d{4}$/g,'')
+  .replace(/-/g,' ')
+  .replace(/\w/g,c=>c.toUpperCase())
+  .substring(0,38);
+
+// ══════════════════════════════════════════════════════════
+// FETCH VIA gviz API — retorna JSON tipado, sem problema de locale
+// ══════════════════════════════════════════════════════════
+async function fetchGviz(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status} gid=${gid}`);
+  const text = await r.text();
+  // Remove wrapper: google.visualization.Query.setResponse({...});
+  const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
+  return json.table;
+}
+
+// Extrai valor numérico de uma célula gviz (v = valor, f = formatado)
+const cellNum = cell => (cell && cell.v != null) ? Number(cell.v) || 0 : 0;
+const cellStr = cell => (cell && cell.v != null) ? String(cell.v) : '';
+const cellDate = cell => {
+  if (!cell || cell.v == null) return null;
+  // gviz envia datas como número de dias desde 1899-12-30 (formato Sheets/Excel)
+  if (typeof cell.v === 'number') {
+    const d = new Date(1899, 11, 30);
+    d.setDate(d.getDate() + cell.v);
+    return d;
+  }
+  // fallback para string "Date(yyyy,m,d)"
+  if (typeof cell.v === 'string' && cell.v.startsWith('Date(')) {
+    const parts = cell.v.replace('Date(','').replace(')','').split(',');
+    return new Date(+parts[0], +parts[1], +parts[2]);
+  }
+  // fallback: usar cell.f (string formatada "dd/mm/yyyy")
+  if (cell.f) {
+    const p = cell.f.split('/');
+    if (p.length === 3) return new Date(+p[2], +p[1]-1, +p[0]);
+  }
+  return null;
+};
+
+// ══════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.main').forEach(m => m.classList.remove('active'));
+  const idx = ['periodo','historico','adsets'].indexOf(name);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════════
+// PARSE CAMPANHAS-1
+// ══════════════════════════════════════════════════════════
+function parseCampanhas(table) {
+  // Row 0: Período | data_inicio | até | data_fim
+  // Row 1: headers
+  // Row 2+: dados
+  const r0 = table.rows[0].c;
+  const startRaw = r0[1] ? (r0[1].f || cellStr(r0[1])) : '';
+  const endRaw   = r0[3] ? (r0[3].f || cellStr(r0[3])) : '';
+  // Formata datas como dd/mm/yyyy
+  const fmtDate = cell => {
+    if (!cell) return '';
+    // Tentar cell.f primeiro (string formatada pelo Sheets, ex: "01/03/2026")
+    if (cell.f && /\d/.test(cell.f)) {
+      // cell.f pode ser "1/3/2026" ou "01/03/2026" ou "03/01/2026"
+      // No Sheets pt-BR é dd/mm/yyyy
+      const p = String(cell.f).split('/');
+      if (p.length === 3) {
+        const day = p[0].padStart(2,'0');
+        const mon = p[1].padStart(2,'0');
+        const yr  = p[2].length === 2 ? '20'+p[2] : p[2];
+        return `${day}/${mon}/${yr}`;
+      }
+      return cell.f;
+    }
+    // Fallback: usar cellDate
+    const d = cellDate(cell);
+    if (!d || isNaN(d) || d.getFullYear() < 2000) return '';
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  };
+  const period = {
+    start: fmtDate(r0[1]),
+    end:   fmtDate(r0[3])
+  };
+
+  const data = [];
+  for (let i = 2; i < table.rows.length; i++) {
+    const r = table.rows[i].c;
+    if (!r || !r[0]) continue;
+    const id = cellStr(r[0]).trim();
+    if (!id || id === 'Campaign ID' || id === 'Total' || !/^\d+$/.test(id)) continue;
+    const inv   = cellNum(r[1]);
+    const guru  = cellNum(r[6]);
+    if (inv === 0 && guru === 0) continue;
+    data.push({
+      id,
+      inv:        inv,
+      cliques:    cellNum(r[2]),
+      cpc:        cellNum(r[3]),
+      fatGads:    cellNum(r[4]),
+      roasGads:   cellNum(r[5]),
+      fatGuru:    guru,
+      roasGuru:   cellNum(r[7]),
+      nome:       cellStr(r[9]),
+      anual:      cellNum(r[10]),
+      anos2:      cellNum(r[11]),
+      anos3:      cellNum(r[12]),
+      mensal:     cellNum(r[13]),
+      bimestral:  cellNum(r[14]),
+      trimestral: cellNum(r[15]),
+      cpassin:    cellNum(r[18]),
+    });
+  }
+  return { period, data };
+}
+
+// ══════════════════════════════════════════════════════════
+// PARSE GERAL (histórico mensal)
+// ══════════════════════════════════════════════════════════
+function parseGeral(table) {
+  const meses = [], semanas = [];
+  const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  for (let i = 1; i < table.rows.length; i++) {
+    const r = table.rows[i].c;
+    if (!r) continue;
+
+    // Colunas 0-8: semanal | coluna 9: separador | colunas 10-18: mensal
+    // SEMANAL
+    if (r[0] && cellDate(r[0])) {
+      const d = cellDate(r[0]);
+      const inv = cellNum(r[1]);
+      if (inv > 0) {
+        semanas.push({
+          date: d,
+          label: `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`,
+          inv,
+          cliques: cellNum(r[2]),
+          fatGads: cellNum(r[4]),
+          roas:    cellNum(r[5]),
+          fatGuru: cellNum(r[6]),
+        });
+      }
+    }
+
+    // MENSAL
+    if (r[10] && cellDate(r[10])) {
+      const d = cellDate(r[10]);
+      const inv = cellNum(r[11]);
+      if (inv > 0) {
+        meses.push({
+          date:    d,
+          label:   MESES_PT[d.getMonth()] + '/' + String(d.getFullYear()).slice(2),
+          inv,
+          fatGads: cellNum(r[14]),
+          roas:    cellNum(r[15]),
+          fatGuru: cellNum(r[16]),
+          roas2:   cellNum(r[17]),
+        });
+      }
+    }
+  }
+  return { meses, semanas };
+}
+
+// ══════════════════════════════════════════════════════════
+// PARSE STR-GADS (adsets)
+// ══════════════════════════════════════════════════════════
+function parseStrGads(table, periodStart, periodEnd) {
+  const campAdset = {};
+  const ps = new Date(periodStart), pe = new Date(periodEnd);
+  pe.setHours(23,59,59);
+
+  for (let i = 1; i < table.rows.length; i++) {
+    const r = table.rows[i].c;
+    if (!r || !r[2]) continue;
+    const d = cellDate(r[2]);
+    if (!d || isNaN(d) || d < ps || d > pe) continue;
+    const cname = cellStr(r[4]).trim();
+    const aname = cellStr(r[6]).trim() || '-';
+    if (!cname) continue;
+    if (!campAdset[cname]) campAdset[cname] = {};
+    if (!campAdset[cname][aname]) campAdset[cname][aname] = {impr:0,clicks:0,spend:0,conv:0,conv_val:0};
+    const m = campAdset[cname][aname];
+    m.impr     += cellNum(r[9]);
+    m.clicks   += cellNum(r[10]);
+    m.spend    += cellNum(r[11]);
+    m.conv     += cellNum(r[12]);
+    m.conv_val += cellNum(r[13]);
+  }
+  return campAdset;
+}
+
+// ══════════════════════════════════════════════════════════
+// SORT TABLE
+// ══════════════════════════════════════════════════════════
+let _campData = null, _geralData = null, _rawStr = null, _rawGuru = null, _rawGads = null, _sortKey = 'fatGuru', _sortDir = -1, _activeDays = 0;
+
+function sortTable(key) {
+  if (_sortKey === key) _sortDir *= -1; else { _sortKey = key; _sortDir = -1; }
+  if (_campData) renderPeriodo(_campData);
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER PERÍODO ATUAL
+// ══════════════════════════════════════════════════════════
+function renderPeriodo(camp) {
+  _campData = camp;
+  const { period, data } = camp;
+  const excl = data.filter(d => EXCLUIR.includes(d.id));
+  const base = data.filter(d => !EXCLUIR.includes(d.id) && d.inv > 0);
+
+  const totalInv    = data.reduce((s,d) => s+d.inv, 0);
+  const baseInv     = base.reduce((s,d) => s+d.inv, 0);
+  const baseFatGads = base.reduce((s,d) => s+d.fatGads, 0);
+  const baseFatGuru = base.reduce((s,d) => s+d.fatGuru, 0);
+  const baseCliques = base.reduce((s,d) => s+d.cliques, 0);
+  const roasGads    = baseInv > 0 ? baseFatGads/baseInv : 0;
+  const roasGuru    = baseInv > 0 ? baseFatGuru/baseInv : 0;
+  const totalAnual     = base.reduce((s,d) => s+d.anual, 0);
+  const totalMensal    = base.reduce((s,d) => s+d.mensal, 0);
+  const totalAnos3     = base.reduce((s,d) => s+d.anos2+d.anos3, 0);
+  const totalBimestral = base.reduce((s,d) => s+(d.bimestral||0), 0);
+  const totalTrimestral= base.reduce((s,d) => s+(d.trimestral||0), 0);
+  const totalAssin     = totalAnual + totalMensal + totalAnos3 + totalBimestral + totalTrimestral;
+  const cpc         = baseCliques > 0 ? baseInv/baseCliques : 0;
+
+  document.getElementById('periodBadge').textContent = `${period.start} – ${period.end}`;
+  document.getElementById('campTableLabel').textContent = `Campanhas — ${period.start} a ${period.end}`;
+
+  // KPIs
+  document.getElementById('kpisRow').innerHTML = `
+    <div class="card kpi blue">
+      <div class="card-label">Investimento</div>
+      <div class="kv">${fmtR(totalInv)}</div>
+      <div class="ks">período completo</div>
+      <div class="ksplit">
+        <div class="ksplit-item"><div class="ksplit-lbl">Computado</div><div class="ksplit-val">${fmtR(baseInv)}</div></div>
+        <div class="ksplit-item"><div class="ksplit-lbl">Cliques</div><div class="ksplit-val" style="color:var(--blue)">${fmt(baseCliques)}</div></div>
+      </div>
+    </div>
+    <div class="card kpi gold">
+      <div class="card-label">Faturamento GAds</div>
+      <div class="kv">${fmtR(baseFatGads)}</div>
+      <div class="ks">campanhas computadas</div>
+      <div class="ksplit">
+        <div class="ksplit-item"><div class="ksplit-lbl">ROAS</div><div class="ksplit-val" style="color:var(--gold)">${fmtX(roasGads)}</div></div>
+        <div class="ksplit-item"><div class="ksplit-lbl">CPC médio</div><div class="ksplit-val">${fmtR(cpc,2)}</div></div>
+      </div>
+    </div>
+    <div class="card kpi green">
+      <div class="card-label">Faturamento Guru</div>
+      <div class="kv">${fmtR(baseFatGuru)}</div>
+      <div class="ks">assinaturas confirmadas</div>
+      <div class="ksplit">
+        <div class="ksplit-item"><div class="ksplit-lbl">ROAS</div><div class="ksplit-val" style="color:var(--green)">${fmtX(roasGuru)}</div></div>
+        <div class="ksplit-item"><div class="ksplit-lbl">CPC médio</div><div class="ksplit-val">${fmtR(cpc,2)}</div></div>
+      </div>
+    </div>
+    <div class="card kpi teal">
+      <div class="card-label">Cliques Totais</div>
+      <div class="kv">${fmt(baseCliques)}</div>
+      <div class="ks">CPC médio <b>${fmtR(cpc,2)}</b></div>
+      <div class="ksplit">
+        <div class="ksplit-item"><div class="ksplit-lbl">Campanhas</div><div class="ksplit-val">${base.length}</div></div>
+        <div class="ksplit-item"><div class="ksplit-lbl">Excluídas</div><div class="ksplit-val">${excl.length}</div></div>
+      </div>
+    </div>
+    <div class="card kpi gold">
+      <div class="card-label">Assinaturas Guru</div>
+      <div class="kv">${fmt(totalAssin)}</div>
+      <div class="ks">vendas atribuídas</div>
+      <div class="ksplit">
+        <div class="ksplit-item"><div class="ksplit-lbl">Anual</div><div class="ksplit-val" style="color:var(--gold)">${fmt(totalAnual)}</div></div>
+        <div class="ksplit-item"><div class="ksplit-lbl">Mensal</div><div class="ksplit-val" style="color:var(--teal)">${fmt(totalMensal)}</div></div>
+      </div>
+      ${totalAnos3>0?`<div style="padding-top:6px;font-size:10px;color:var(--text3)">${fmt(totalAnos3)} × 2/3 anos${(totalBimestral+totalTrimestral)>0?' · '+fmt(totalBimestral+totalTrimestral)+' bi/trim':''}</div>`:''}
+    </div>
+    <div class="card kpi coral">
+      <div class="card-label">ROAS Guru</div>
+      <div class="kv">${fmtX(roasGuru)}</div>
+      <div class="ks">Fat. Guru / Investimento</div>
+      <div class="ksplit">
+        <div class="ksplit-item"><div class="ksplit-lbl">ROAS GAds</div><div class="ksplit-val">${fmtX(roasGads)}</div></div>
+        <div class="ksplit-item"><div class="ksplit-lbl">2/3 Anos</div><div class="ksplit-val">${fmt(totalAnos3)}</div></div>
+      </div>
+    </div>`;
+
+  // Nota exclusão
+  if (excl.length > 0) {
+    document.getElementById('notaExcl').style.display = 'flex';
+    document.getElementById('notaExclText').innerHTML =
+      `<strong>Campanhas excluídas do ROAS:</strong> ${excl.map(e => `<strong>${e.nome}</strong> (${fmtR(e.inv)})`).join(' e ')}. Invest. computado: <strong>${fmtR(baseInv)}</strong> de ${fmtR(totalInv)} total.`;
+  }
+
+  // Tabela campanhas — ordenável
+  const sorted = [...base].sort((a,b) => _sortDir*(b[_sortKey] - a[_sortKey]));
+  let tbody = '';
+  sorted.forEach(d => {
+    const badges = [
+      d.anual      > 0 ? `<span class="type-badge type-a">${d.anual} A</span>` : '',
+      d.mensal     > 0 ? `<span class="type-badge type-m">${d.mensal} M</span>` : '',
+      d.anos2+d.anos3 > 0 ? `<span class="type-badge type-3">${d.anos2+d.anos3} ×2/3a</span>` : '',
+      (d.bimestral||0) > 0 ? `<span class="type-badge type-m">${d.bimestral} B</span>` : '',
+      (d.trimestral||0) > 0 ? `<span class="type-badge type-3">${d.trimestral} T</span>` : '',
+    ].join('');
+    tbody += `<tr>
+      <td class="name" title="${d.nome}">${d.nome}</td>
+      <td>${fmtR(d.inv)}</td>
+      <td class="fat">${fmtR(d.fatGads)}</td>
+      <td>${pill(d.roasGads)}</td>
+      <td class="fat">${fmtR(d.fatGuru)}</td>
+      <td>${badges||'—'}</td>
+      <td>${pill(d.roasGuru)}</td>
+    </tr>`;
+  });
+  excl.forEach(d => {
+    tbody += `<tr class="excluida">
+      <td class="name" style="color:var(--text3)" title="${d.nome}">${d.nome} <span style="font-size:10px">(excl.)</span></td>
+      <td>${fmtR(d.inv)}</td><td style="color:var(--text3)">${fmtR(d.fatGads)}</td>
+      <td><span class="pill pill-na">excl.</span></td>
+      <td style="color:var(--text3)">—</td><td></td>
+      <td><span class="pill pill-na">excl.</span></td>
+    </tr>`;
+  });
+  document.getElementById('campBody').innerHTML = tbody;
+  document.getElementById('campFoot').innerHTML = `<tr>
+    <td>Total computado</td><td>${fmtR(baseInv)}</td>
+    <td>${fmtR(baseFatGads)}</td><td>${fmtX(roasGads)}</td>
+    <td>${fmtR(baseFatGuru)}</td><td>${fmt(totalAssin)}</td>
+    <td><span class="pill ${roasGuru>=4?'pill-mid':'pill-lo'}">${fmtX(roasGuru)}</span></td>
+  </tr>`;
+
+  // Donut
+  const top = [...base].sort((a,b) => b.inv - a.inv).slice(0, 5);
+  const canvas = document.getElementById('donutCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,110,110);
+  let angle = -Math.PI/2;
+  const cx=55, cy=55, r=44, inner=28;
+  top.forEach((d,i) => {
+    const pct = d.inv/totalInv;
+    const end = angle + pct*2*Math.PI;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,angle,end); ctx.closePath();
+    ctx.fillStyle = COLORS[i]; ctx.fill(); angle = end;
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,inner,0,2*Math.PI); ctx.fillStyle='#FFF'; ctx.fill();
+  ctx.fillStyle='#6B6560'; ctx.font='500 9px Sora,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('INVEST.', cx, cy-5); ctx.fillStyle='#1A1714'; ctx.font='600 10px Sora,sans-serif';
+  ctx.fillText(fmtR(totalInv), cx, cy+7);
+  document.getElementById('donutLegend').innerHTML = top.map((d,i) => `
+    <div class="donut-item">
+      <div class="donut-dot" style="background:${COLORS[i]}"></div>
+      <div class="donut-name">${(d.nome.length>28?d.nome.substring(0,26)+"…":d.nome)}</div>
+      <div><div class="donut-pct">${Math.round(d.inv/totalInv*100)}%</div><div class="donut-val">${fmtR(d.inv)}</div></div>
+    </div>`).join('');
+
+  // Search insight
+  const search = base.find(d => d.nome.includes('search'));
+  if (search) document.getElementById('searchInsight').innerHTML = `
+    <div class="insight teal"><div class="insight-icon">💡</div>
+    <p><strong>Search</strong> usa ${Math.round(search.inv/baseInv*100)}% do investimento e entrega <strong>ROAS Guru de ${fmtX(search.roasGuru)}</strong>. Maior potencial de escala.</p></div>`;
+
+  // ROAS Strip
+  document.getElementById('roasStrip').innerHTML = `
+    <div class="roas-item"><div class="roas-lbl">ROAS Google Ads</div><div class="roas-big" style="color:var(--green)">${fmtX(roasGads)}</div><div class="roas-note">Fat. ${fmtR(baseFatGads)} / Invest. ${fmtR(baseInv)}</div></div>
+    <div class="roas-item"><div class="roas-lbl">ROAS Guru Assinaturas</div><div class="roas-big" style="color:var(--gold)">${fmtX(roasGuru)}</div><div class="roas-note">Fat. ${fmtR(baseFatGuru)} / Invest. ${fmtR(baseInv)}</div></div>`;
+
+  // Assinaturas
+  document.getElementById('assinsMini').innerHTML = `
+    <div class="assin-card"><div class="assin-val" style="color:var(--gold)">${fmt(totalAnual)}</div><div class="assin-lbl">Anuais</div></div>
+    <div class="assin-card"><div class="assin-val" style="color:var(--teal)">${fmt(totalMensal)}</div><div class="assin-lbl">Mensais</div></div>
+    <div class="assin-card"><div class="assin-val" style="color:var(--blue)">${fmt(totalAnos3)}</div><div class="assin-lbl">2/3 Anos</div></div>
+    ${(totalBimestral+totalTrimestral)>0?`<div class="assin-card"><div class="assin-val" style="color:var(--teal)">${fmt(totalBimestral+totalTrimestral)}</div><div class="assin-lbl">Bi/Trim.</div></div>`:''}`;
+
+  const bestVol = [...base].sort((a,b) => (b.anual+b.mensal)-(a.anual+a.mensal))[0];
+  const bestRg  = [...base].sort((a,b) => b.roasGuru - a.roasGuru)[0];
+  const bestRa  = [...base].sort((a,b) => b.roasGads - a.roasGads)[0];
+  document.getElementById('assinDetails').innerHTML = `
+    <div class="mrow"><span class="mrow-key">Total de assinaturas</span><span class="mrow-val">${fmt(totalAssin)}</span></div>
+    <div class="mrow"><span class="mrow-key">Anuais</span><span class="mrow-val gold">${fmt(totalAnual)}</span></div>
+    <div class="mrow"><span class="mrow-key">Mensais</span><span class="mrow-val teal">${fmt(totalMensal)}</span></div>
+    ${totalAnos3>0?`<div class="mrow"><span class="mrow-key">2/3 Anos</span><span class="mrow-val blue">${fmt(totalAnos3)}</span></div>`:''}
+    ${(totalBimestral+totalTrimestral)>0?`<div class="mrow"><span class="mrow-key">Bi/Trimestral</span><span class="mrow-val">${fmt(totalBimestral+totalTrimestral)}</span></div>`:''}
+    <div class="mrow"><span class="mrow-key">Maior volume</span><span class="mrow-val gold">${bestVol?.nome}: ${fmt((bestVol?.anual||0)+(bestVol?.mensal||0))}</span></div>
+    <div class="mrow"><span class="mrow-key">Melhor ROAS Guru</span><span class="mrow-val green">${bestRg?.nome}: ${fmtX(bestRg?.roasGuru)}</span></div>
+    <div class="mrow"><span class="mrow-key">Melhor ROAS GAds</span><span class="mrow-val green">${bestRa?.nome}: ${fmtX(bestRa?.roasGads)}</span></div>
+    <div class="insight gold" style="margin-top:12px"><div class="insight-icon">📊</div>
+    <p>Anual responde por <strong>${Math.round(totalAnual/Math.max(totalAssin,1)*100)}% das assinaturas</strong>, sustentando o ticket médio mais alto.</p></div>`;
+
+  const byGuru = [...base].sort((a,b) => b.roasGuru - a.roasGuru);
+  const worst  = byGuru[byGuru.length-1];
+  document.getElementById('destaques').innerHTML = byGuru.map(d => `
+    <div class="mrow">
+      <span class="mrow-key">${d.nome}</span>
+      <span class="mrow-val ${d.roasGuru>=5?'green':d.roasGuru>=2.5?'gold':'coral'}">${fmtX(d.roasGuru)} · ${fmt(d.anual+d.mensal+d.anos2+d.anos3)} vend.</span>
+    </div>`).join('') + `
+    <div class="insight warn" style="margin-top:12px"><div class="insight-icon">🔍</div>
+    <p><strong>${worst?.nome}</strong> com menor ROAS Guru (${fmtX(worst?.roasGuru)}). Revisar criativos e segmentação.</p></div>`;
+
+  const best = byGuru[0];
+  document.getElementById('bestCampCard').innerHTML = `
+    <div class="card-label">${best.nome} — Detalhe</div>
+    <div class="mrow"><span class="mrow-key">Investimento</span><span class="mrow-val">${fmtR(best.inv,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">Faturamento GAds</span><span class="mrow-val gold">${fmtR(best.fatGads,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">ROAS GAds</span><span class="mrow-val green">${fmtX(best.roasGads)}</span></div>
+    <div class="mrow"><span class="mrow-key">Faturamento Guru</span><span class="mrow-val gold">${fmtR(best.fatGuru,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">ROAS Guru</span><span class="mrow-val green">${fmtX(best.roasGuru)}</span></div>
+    <div class="mrow"><span class="mrow-key">Assinaturas</span><span class="mrow-val">${fmt(best.anual+best.mensal)} (${best.anual} Anual · ${best.mensal} Mensal${best.anos2+best.anos3>0?' · '+(best.anos2+best.anos3)+' ×2/3a':''})</span></div>
+    <div class="mrow"><span class="mrow-key">Cliques</span><span class="mrow-val">${fmt(best.cliques)}</span></div>
+    <div class="mrow"><span class="mrow-key">CPC</span><span class="mrow-val">${fmtR(best.cpc,2)}</span></div>
+    <div class="insight gold" style="margin-top:12px"><div class="insight-icon">⭐</div>
+    <p>Melhor campanha com <strong>ROAS Guru ${fmtX(best.roasGuru)}</strong>. Canal prioritário para escala.</p></div>`;
+
+  document.getElementById('consolidadoCard').innerHTML = `
+    <div class="card-label">Métricas Consolidadas${period.start ? ' — '+period.start+' a '+period.end : ''}</div>
+    <div class="mrow"><span class="mrow-key">Investimento total</span><span class="mrow-val">${fmtR(totalInv,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">Investimento computado</span><span class="mrow-val">${fmtR(baseInv,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">Cliques totais</span><span class="mrow-val teal">${fmt(baseCliques)}</span></div>
+    <div class="mrow"><span class="mrow-key">CPC médio</span><span class="mrow-val">${fmtR(cpc,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">Fat. GAds total</span><span class="mrow-val">${fmtR(baseFatGads,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">Fat. Guru total</span><span class="mrow-val gold">${fmtR(baseFatGuru,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">ROAS GAds</span><span class="mrow-val green">${fmtX(roasGads)}</span></div>
+    <div class="mrow"><span class="mrow-key">ROAS Guru</span><span class="mrow-val green">${fmtX(roasGuru)}</span></div>
+    <div class="mrow"><span class="mrow-key">Canal YouTube</span><span class="mrow-val teal">10.000 inscritos · marco 13/03/26</span></div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// FILTROS DE PERÍODO
+// ══════════════════════════════════════════════════════════
+
+function setPeriodFilter(days) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  _activeDays = days;
+  if (days === 0) { if (_campData) renderPeriodo(_campData); return; }
+  if (!_geralData) return;
+  const semanas = _geralData.semanas;
+  if (!semanas.length) return;
+  const lastDate = semanas[semanas.length-1].date;
+  const cutoff   = new Date(lastDate); cutoff.setDate(cutoff.getDate() - days);
+  const filtered = semanas.filter(s => s.date >= cutoff && s.inv > 0);
+  if (!filtered.length) return;
+  const inv     = filtered.reduce((s,d) => s+d.inv, 0);
+  const fatGads = filtered.reduce((s,d) => s+d.fatGads, 0);
+  const fatGuru = filtered.reduce((s,d) => s+d.fatGuru, 0);
+  const cliques = filtered.reduce((s,d) => s+d.cliques, 0);
+  const roasG   = inv > 0 ? fatGads/inv : 0;
+  const roasGu  = inv > 0 ? fatGuru/inv : 0;
+  const cpc     = cliques > 0 ? inv/cliques : 0;
+  const label   = days === 1 ? 'hoje' : `últimos ${days} dias`;
+  document.getElementById('periodBadge').textContent = label;
+  document.getElementById('campTableLabel').textContent = `Métricas — ${label}`;
+  document.getElementById('kpisRow').innerHTML = `
+    <div class="card kpi blue"><div class="card-label">Investimento</div><div class="kv">${fmtR(inv)}</div><div class="ks">${label}</div><div class="ksplit"><div class="ksplit-item"><div class="ksplit-lbl">Semanas</div><div class="ksplit-val">${filtered.length}</div></div><div class="ksplit-item"><div class="ksplit-lbl">CPC</div><div class="ksplit-val">${fmtR(cpc,2)}</div></div></div></div>
+    <div class="card kpi gold"><div class="card-label">Faturamento GAds</div><div class="kv">${fmtR(fatGads)}</div><div class="ks">${label}</div><div class="ksplit"><div class="ksplit-item"><div class="ksplit-lbl">ROAS</div><div class="ksplit-val" style="color:var(--gold)">${fmtX(roasG)}</div></div><div class="ksplit-item"><div class="ksplit-lbl">Invest.</div><div class="ksplit-val">${fmtR(inv)}</div></div></div></div>
+    <div class="card kpi green"><div class="card-label">Faturamento Guru</div><div class="kv">${fmtR(fatGuru)}</div><div class="ks">${label}</div><div class="ksplit"><div class="ksplit-item"><div class="ksplit-lbl">ROAS</div><div class="ksplit-val" style="color:var(--green)">${fmtX(roasGu)}</div></div><div class="ksplit-item"><div class="ksplit-lbl">CPC</div><div class="ksplit-val">${fmtR(cpc,2)}</div></div></div></div>
+    <div class="card kpi teal"><div class="card-label">Cliques</div><div class="kv">${fmt(cliques)}</div><div class="ks">CPC médio <b>${fmtR(cpc,2)}</b></div><div class="ksplit"><div class="ksplit-item"><div class="ksplit-lbl">Invest.</div><div class="ksplit-val">${fmtR(inv)}</div></div><div class="ksplit-item"><div class="ksplit-lbl">Período</div><div class="ksplit-val">${label}</div></div></div></div>
+    <div class="card kpi gold"><div class="card-label">ROAS GAds</div><div class="kv">${fmtX(roasG)}</div><div class="ks">Fat. ${fmtR(fatGads)} / Invest. ${fmtR(inv)}</div><div class="ksplit"><div class="ksplit-item"><div class="ksplit-lbl">Fat. GAds</div><div class="ksplit-val" style="color:var(--gold)">${fmtR(fatGads)}</div></div><div class="ksplit-item"><div class="ksplit-lbl">Invest.</div><div class="ksplit-val">${fmtR(inv)}</div></div></div></div>
+    <div class="card kpi coral"><div class="card-label">ROAS Guru</div><div class="kv">${fmtX(roasGu)}</div><div class="ks">Fat. ${fmtR(fatGuru)} / Invest. ${fmtR(inv)}</div><div class="ksplit"><div class="ksplit-item"><div class="ksplit-lbl">Fat. Guru</div><div class="ksplit-val">${fmtR(fatGuru)}</div></div><div class="ksplit-item"><div class="ksplit-lbl">Invest.</div><div class="ksplit-val">${fmtR(inv)}</div></div></div></div>`;
+  document.getElementById('roasStrip').innerHTML = `
+    <div class="roas-item"><div class="roas-lbl">ROAS Google Ads</div><div class="roas-big" style="color:var(--green)">${fmtX(roasG)}</div><div class="roas-note">Fat. ${fmtR(fatGads)} / Invest. ${fmtR(inv)}</div></div>
+    <div class="roas-item"><div class="roas-lbl">ROAS Guru Assinaturas</div><div class="roas-big" style="color:var(--gold)">${fmtX(roasGu)}</div><div class="roas-note">Fat. ${fmtR(fatGuru)} / Invest. ${fmtR(inv)}</div></div>`;
+  document.getElementById('notaExcl').style.display = 'none';
+  document.getElementById('campBody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">Detalhamento por campanha disponível apenas no Período completo</td></tr>`;
+  document.getElementById('campFoot').innerHTML = '';
+  document.getElementById('assinsMini').innerHTML = '';
+  document.getElementById('assinDetails').innerHTML = `<div class="mrow"><span class="mrow-key">Detalhamento de assinaturas</span><span class="mrow-val" style="color:var(--text3)">disponível no Período completo</span></div>`;
+  document.getElementById('destaques').innerHTML = '';
+  document.getElementById('bestCampCard').innerHTML = '';
+  document.getElementById('consolidadoCard').innerHTML = `
+    <div class="card-label">Resumo — ${label}</div>
+    <div class="mrow"><span class="mrow-key">Investimento</span><span class="mrow-val">${fmtR(inv,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">Faturamento GAds</span><span class="mrow-val gold">${fmtR(fatGads,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">ROAS GAds</span><span class="mrow-val green">${fmtX(roasG)}</span></div>
+    <div class="mrow"><span class="mrow-key">Faturamento Guru</span><span class="mrow-val gold">${fmtR(fatGuru,2)}</span></div>
+    <div class="mrow"><span class="mrow-key">ROAS Guru</span><span class="mrow-val green">${fmtX(roasGu)}</span></div>
+    <div class="mrow"><span class="mrow-key">Cliques</span><span class="mrow-val teal">${fmt(cliques)}</span></div>
+    <div class="mrow"><span class="mrow-key">CPC médio</span><span class="mrow-val">${fmtR(cpc,2)}</span></div>`;
+  const canvas = document.getElementById('donutCanvas');
+  canvas.getContext('2d').clearRect(0,0,110,110);
+  document.getElementById('donutLegend').innerHTML = '';
+  document.getElementById('searchInsight').innerHTML = '';
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER HISTÓRICO
+// ══════════════════════════════════════════════════════════
+let _hc = null, _rc = null;
+function renderHistorico(geral, campData) {
+  let { meses } = geral;
+
+  // Sobrescrever o mês atual com os totais reais da Campanhas-1
+  // (a aba Geral pode estar desatualizada para o mês em curso)
+  if (campData && campData.data && campData.period) {
+    const EXCLUIR_IDS = new Set(['22316334459','23237243987']);
+    const base = campData.data.filter(d => !EXCLUIR_IDS.has(d.id) && d.inv > 0);
+    const campInv     = base.reduce((s,d) => s+d.inv, 0);
+    const campFatGads = base.reduce((s,d) => s+d.fatGads, 0);
+    const campFatGuru = base.reduce((s,d) => s+d.fatGuru, 0);
+    const campRoasG   = campInv > 0 ? campFatGads/campInv : 0;
+    const campRoasGu  = campInv > 0 ? campFatGuru/campInv : 0;
+
+    // Descobrir o mês/ano do período atual da Campanhas-1
+    if (campData.period.start) {
+      const parts = campData.period.start.split('/');
+      if (parts.length === 3) {
+        const periodoMes = parseInt(parts[1]) - 1; // 0-indexed
+        const periodoAno = parseInt(parts[2]);
+        const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const labelAtual = MESES_PT[periodoMes] + '/' + String(periodoAno).slice(2);
+
+        // Verificar se já existe esse mês no histórico (por label string)
+        const idxMes = meses.findIndex(m => m.label === labelAtual);
+        console.log('[renderHistorico] Override:', labelAtual, 'idxMes:', idxMes, 'camp fatGuru:', campFatGuru);
+
+        const mesAtualizado = {
+          date:    new Date(periodoAno, periodoMes, 1),
+          label:   labelAtual,
+          inv:     campData.data.reduce((s,d) => s+d.inv, 0), // investimento total incluindo excluídas
+          fatGads: campFatGads,
+          roas:    campRoasG,
+          fatGuru: campFatGuru,
+          roas2:   campRoasGu,
+        };
+
+        if (idxMes >= 0) {
+          meses = [...meses];
+          meses[idxMes] = mesAtualizado;
+        } else {
+          meses = [...meses, mesAtualizado].sort((a,b) => a.date - b.date);
+        }
+      }
+    }
+  }
+
+  const lbls = meses.map(m => m.label);
+
+  // Gráfico principal — Guru em destaque, GAds secundário, linha investimento
+  if (_hc) _hc.destroy();
+  _hc = new Chart(document.getElementById('histChart'), {
+    data: { labels: lbls, datasets: [
+      { type:'bar',  label:'Fat. Guru',    data: meses.map(m=>m.fatGuru), backgroundColor:'rgba(29,158,117,0.75)', borderRadius:4, yAxisID:'y1', order:2 },
+      { type:'bar',  label:'Fat. GAds',    data: meses.map(m=>m.fatGads), backgroundColor:'rgba(184,116,42,0.45)', borderRadius:4, yAxisID:'y1', order:3 },
+      { type:'line', label:'Investimento', data: meses.map(m=>m.inv),     borderColor:'#5B9BF0', backgroundColor:'transparent', tension:0.4, pointRadius:5, pointBackgroundColor:'#5B9BF0', borderWidth:2, yAxisID:'y1', order:1 },
+    ]},
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': R$'+ctx.parsed.y.toLocaleString('pt-BR',{minimumFractionDigits:0})}} },
+      scales:{ x:{grid:{display:false},ticks:{font:{size:11}}}, y1:{ticks:{font:{size:10},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'rgba(0,0,0,0.05)'}} }
+    }
+  });
+
+  // Gráfico ROAS Guru
+  if (_rc) _rc.destroy();
+  _rc = new Chart(document.getElementById('roasChart'), {
+    type:'bar',
+    data:{ labels:lbls, datasets:[{ data:meses.map(m=>+m.roas2.toFixed(2)),
+      backgroundColor:meses.map(m=>m.roas2>=5?'rgba(29,158,117,0.8)':m.roas2>=2.5?'rgba(184,116,42,0.75)':'rgba(192,78,48,0.65)'), borderRadius:4 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toFixed(2)+'×'}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{font:{size:10},callback:v=>v+'×'},grid:{color:'rgba(0,0,0,0.05)'}}}
+    }
+  });
+
+  // Tabela com colunas focadas em Guru
+  let tbl = `<table class="ctable" style="font-size:11px">
+    <thead><tr>
+      <th>Mês</th><th>Investimento</th>
+      <th>Fat. Guru</th><th>ROAS Guru</th>
+      <th>Fat. GAds</th><th>ROAS GAds</th>
+    </tr></thead><tbody>`;
+  meses.forEach(m => {
+    tbl += `<tr>
+      <td class="name">${m.label}</td>
+      <td>${fmtR(m.inv)}</td>
+      <td class="fat" style="color:var(--green)">${fmtR(m.fatGuru)}</td>
+      <td>${pill(m.roas2)}</td>
+      <td class="fat">${fmtR(m.fatGads)}</td>
+      <td>${pill(m.roas)}</td>
+    </tr>`;
+  });
+  document.getElementById('histTable').innerHTML = tbl + '</tbody></table>';
+
+  // Ranking de campanhas — histórico completo
+  if (!campData) return;
+  const EXCL = ['22316334459','23237243987'];
+  const base = campData.data.filter(d => !EXCL.includes(d.id));
+  const sorted = [...base].sort((a,b) => b.fatGuru - a.fatGuru);
+  const totalGuru = sorted.reduce((s,d) => s+d.fatGuru, 0);
+  const totalInv  = sorted.reduce((s,d) => s+d.inv, 0);
+
+  let rank = `<table class="ctable">
+    <thead><tr>
+      <th>#</th><th>Campanha</th>
+      <th>Investimento</th><th>Fat. Guru</th><th>ROAS Guru</th>
+      <th>Fat. GAds</th><th>ROAS GAds</th>
+      <th>Anuais</th><th>Mensais</th><th>% fat. Guru</th>
+    </tr></thead><tbody>`;
+  sorted.forEach((d,i) => {
+    const pct = totalGuru > 0 ? (d.fatGuru/totalGuru*100).toFixed(1) : 0;
+    const barW = Math.round(d.fatGuru/Math.max(...sorted.map(x=>x.fatGuru))*80);
+    rank += `<tr>
+      <td style="color:var(--text3);font-weight:600">${i+1}</td>
+      <td class="name" title="${d.nome}">${d.nome}</td>
+      <td>${fmtR(d.inv)}</td>
+      <td class="fat" style="color:var(--green)">${fmtR(d.fatGuru)}</td>
+      <td>${pill(d.roasGuru)}</td>
+      <td class="fat">${fmtR(d.fatGads)}</td>
+      <td>${pill(d.roasGads)}</td>
+      <td><span class="type-badge type-a">${d.anual}</span></td>
+      <td><span class="type-badge type-m">${d.mensal}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:${barW}px;height:6px;background:var(--green);border-radius:3px;opacity:.7"></div>
+          <span style="font-size:11px;color:var(--text2)">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  });
+  rank += '</tbody></table>';
+  document.getElementById('histCampRanking').innerHTML = rank;
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER ADSETS
+// ══════════════════════════════════════════════════════════
+// Parse utm_medium do Guru por campaign_id
+function parseGuruMediums(table, periodStart, periodEnd) {
+  const result = {};
+  const ps = periodStart, pe = periodEnd;
+
+  // Descobre índices pelos nomes dos cabeçalhos (linha 0)
+  const headers = (table.rows[0] && table.rows[0].c) ? table.rows[0].c.map(c => c ? String(c.v||c.f||'').trim().toLowerCase() : '') : [];
+  const idx = {
+    date:   headers.findIndex(h => h.includes('data') && (h.includes('aprova') || h.includes('pagamento'))),
+    campId: headers.findIndex(h => h === 'rppc utm campaign'),
+    rppc:   headers.findIndex(h => h === 'rppc utm medium'),
+    medium: headers.findIndex(h => h.includes('utm') && h.includes('medium') && !h.includes('rppc')),
+    valor:  headers.findIndex(h => h.includes('valor') && h.includes('liquido')),
+  };
+
+  // Fallbacks para índices fixos caso os cabeçalhos não sejam encontrados
+  if (idx.date   < 0) idx.date   = 46;
+  if (idx.campId < 0) idx.campId = 52;  // coluna BA
+  if (idx.rppc   < 0) idx.rppc   = 53;  // coluna BB
+  if (idx.medium < 0) idx.medium = 62;
+  if (idx.valor  < 0) idx.valor  = 12;
+
+  console.log('[parseGuruMediums] índices encontrados:', idx, '| cabeçalhos:', headers.slice(0,70));
+
+  for (let i = 1; i < table.rows.length; i++) {
+    const r = table.rows[i].c;
+    if (!r) continue;
+    const dateCell = r[idx.date];
+    if (!dateCell) continue;
+    const d = cellDate(dateCell);
+    if (!d || isNaN(d) || d < ps || d > pe) continue;
+    const campId = r[idx.campId] ? String(r[idx.campId].v||'').trim() : '';
+    // Fallback: tentar col 61 (utm_campaign) se rppc utm campaign estiver vazio
+    const campIdFinal = campId || (r[61] ? String(r[61].v||'').trim() : '');
+    if (!campIdFinal) continue;
+
+    // Prioriza rppc utm medium (mais confiável para PMax), fallback para utm_medium comum
+    let medium = (idx.rppc >= 0 && r[idx.rppc]) ? String(r[idx.rppc].v||'').trim() : '';
+    if (!medium) medium = r[idx.medium] ? String(r[idx.medium].v||'').trim() : '';
+    const key = medium || '(sem grupo)';
+
+    const valor = r[idx.valor] ? Number(r[idx.valor].v||0) : 0;
+    if (!result[campIdFinal]) result[campIdFinal] = {};
+    if (!result[campIdFinal][key]) result[campIdFinal][key] = {fat:0, count:0};
+    result[campIdFinal][key].fat   += valor;
+    result[campIdFinal][key].count += 1;
+  }
+  return result;
+}
+
+function buildGuruTable(list) {
+  const totalFat = list.reduce(function(s,x){return s+x.fat;}, 0);
+  const maxFat = Math.max.apply(null, list.map(function(x){return x.fat;}));
+  var rows = '';
+  list.forEach(function(a, i) {
+    var pct = totalFat > 0 ? (a.fat/totalFat*100).toFixed(1) : 0;
+    var barW = Math.round(a.fat/maxFat*70);
+    var melhor = i===0 ? '<span style="font-size:10px;background:var(--gold-pale);color:var(--gold);padding:1px 6px;border-radius:3px;margin-right:5px;">melhor</span>' : '';
+    var nome = a.name.length>50 ? a.name.substring(0,48)+'\u2026' : a.name;
+    rows += '<tr>'
+      + '<td class="name">' + melhor + '<span title="' + a.name + '">' + nome + '</span></td>'
+      + '<td class="fat" style="color:var(--green)">' + fmtR(a.fat,2) + '</td>'
+      + '<td>' + a.count + '</td>'
+      + '<td><div style="display:flex;align-items:center;gap:6px"><div style="width:' + barW + 'px;height:6px;background:var(--green);border-radius:3px;opacity:.7"></div><span style="font-size:11px">' + pct + '%</span></div></td>'
+      + '</tr>';
+  });
+  return '<table class="ctable"><thead><tr>'
+    + '<th>Grupo de an\u00FAncio (utm_medium)</th><th>Fat. Guru</th><th>Vendas</th><th>% fat. campanha</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function buildStrTable(strList) {
+  var rows = '';
+  strList.forEach(function(a, i) {
+    var melhor = i===0 ? '<span style="font-size:10px;background:var(--gold-pale);color:var(--gold);padding:1px 6px;border-radius:3px;margin-right:5px;">melhor</span>' : '';
+    var nome = a.name.length>40 ? a.name.substring(0,40)+'\u2026' : a.name;
+    rows += '<tr>'
+      + '<td class="name">' + melhor + nome + '</td>'
+      + '<td>' + fmt(a.impr) + '</td>'
+      + '<td>' + fmt(a.clicks) + '</td>'
+      + '<td>' + fmtR(a.spend,2) + '</td>'
+      + '<td>' + fmtR(a.cpc,2) + '</td>'
+      + '<td>' + fmt(a.conv) + '</td>'
+      + '<td class="fat">' + fmtR(a.conv_val,2) + '</td>'
+      + '<td>' + pill(a.roas) + '</td>'
+      + '</tr>';
+  });
+  return '<table class="ctable"><thead><tr>'
+    + '<th>Grupo de an\u00FAncio</th><th>Impress\u00F5es</th><th>Cliques</th><th>Spend</th><th>CPC</th><th>Conv.</th><th>Fat. GAds</th><th>ROAS GAds</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function renderAdsets(strData, campData, guruMediums) {
+  const base = campData.data.filter(d => !EXCLUIR.includes(d.id) && d.inv > 0).sort((a,b) => b.fatGuru - a.fatGuru);
+  let html = '';
+  base.forEach((camp, idx) => {
+    // Grupos via utm_medium do Guru (mais preciso para PMax)
+    const guruGroups = guruMediums ? (guruMediums[camp.id] || {}) : {};
+    const guruList = Object.entries(guruGroups)
+      .map(([name,m]) => ({name, fat:m.fat, count:m.count}))
+      .filter(a => a.fat > 0)
+      .sort((a,b) => b.fat - a.fat);
+    // Fallback: adsets do STR-GAds para Search/DemandGen
+    const strAdsets = strData[camp.nome] || {};
+    const strList = Object.entries(strAdsets)
+      .map(([name,m]) => ({name, ...m, roas:m.spend>0?m.conv_val/m.spend:0, cpc:m.clicks>0?m.spend/m.clicks:0}))
+      .filter(a => a.spend > 0 && a.name !== '-')
+      .sort((a,b) => b.conv_val - a.conv_val);
+    const useGuru = guruList.length > 0;
+    const list = useGuru ? guruList : strList;
+    const best = list[0];
+    html += `<div class="camp-block">
+      <div class="camp-block-header" onclick="toggleBlock(${idx})">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="camp-rank">${idx+1}</span>
+          <div><div class="camp-block-name">${camp.nome}</div><div style="font-size:10px;color:var(--text3);margin-top:1px;">${camp.nome}</div></div>
+        </div>
+        <div class="camp-block-meta">
+          ${best && best.name !== '-' ? `<span style="font-size:11px;color:var(--text2)">Melhor grupo: <strong style="color:var(--text)">${best.name.length>30?best.name.substring(0,30)+'…':best.name}</strong></span>` : ''}
+          <span>${pill(camp.roasGads)}</span><span>${pill(camp.roasGuru)}</span>
+          <span style="font-size:11px;color:var(--text2)">${fmtR(camp.inv)}</span>
+          <span style="font-size:16px;color:var(--text3);margin-left:4px;transition:transform .2s" id="arrow-${idx}">›</span>
+        </div>
+      </div>
+      <div class="camp-block-body" id="body-${idx}">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:14px;margin-bottom:14px;">
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:3px;">Investimento</div><div style="font-size:15px;font-weight:600;font-family:var(--serif)">${fmtR(camp.inv,2)}</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:3px;">Fat. GAds</div><div style="font-size:15px;font-weight:600;font-family:var(--serif);color:var(--gold)">${fmtR(camp.fatGads,2)}</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:3px;">Fat. Guru</div><div style="font-size:15px;font-weight:600;font-family:var(--serif);color:var(--green)">${fmtR(camp.fatGuru,2)}</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:3px;">Assinaturas</div><div style="font-size:15px;font-weight:600;font-family:var(--serif)">${fmt(camp.anual+camp.mensal+camp.anos2+camp.anos3)}<span style="font-size:10px;font-weight:400;color:var(--text3);margin-left:4px">${camp.anual}A·${camp.mensal}M</span></div></div>
+        </div>
+        ${list.length > 0 ? (useGuru ? buildGuruTable(list) : buildStrTable(strList)) : '<div style="font-size:12px;color:var(--text3);padding:12px 0;">Sem dados de grupos disponíveis para este período.</div>'}
+      </div>
+    </div>`;
+  });
+  document.getElementById('adsetsList').innerHTML = html || '<div style="color:var(--text3);padding:24px;">Nenhuma campanha encontrada.</div>';
+}
+
+function toggleBlock(idx) {
+  const b = document.getElementById('body-'+idx), a = document.getElementById('arrow-'+idx);
+  const open = b.classList.contains('open');
+  b.classList.toggle('open', !open);
+  if (a) { a.style.transform = open ? '' : 'rotate(90deg)'; }
+}
+function expandAll()   { document.querySelectorAll('.camp-block-body').forEach((b,i) => { b.classList.add('open');    const a=document.getElementById('arrow-'+i); if(a) a.style.transform='rotate(90deg)'; }); }
+function collapseAll() { document.querySelectorAll('.camp-block-body').forEach((b,i) => { b.classList.remove('open'); const a=document.getElementById('arrow-'+i); if(a) a.style.transform=''; }); }
+
+// ══════════════════════════════════════════════════════════
+// APPLY CUSTOM PERIOD — agrega STR-GAds + Guru pelo intervalo escolhido
+// ══════════════════════════════════════════════════════════
+function applyCustomPeriod() {
+  const fromVal = document.getElementById('dateFrom').value;
+  const toVal   = document.getElementById('dateTo').value;
+  if (!fromVal || !toVal) { alert('Selecione as duas datas.'); return; }
+  if (!_rawStr || !_rawGuru || !_rawGads) { alert('Dados ainda não carregados.'); return; }
+
+  const pStart = new Date(fromVal + 'T00:00:00');
+  const pEnd   = new Date(toVal   + 'T23:59:59');
+  if (pStart > pEnd) { alert('Data inicial deve ser anterior à data final.'); return; }
+
+  // ── Agrega STR-GAds por campanha ──────────────────────────
+  // cols: 2=data, 4=campaign_name, 9=impr, 10=clicks, 11=spend, 12=conv, 13=conv_val
+  // ── Agrega aba GAds por campanha ─────────────────────────
+  // cols: 0=Dia, 1=campaign_id, 2=campaign_name, 3=impr, 4=clicks, 6=custo, 7=conv, 8=conv_val
+  const gadsMap = {}; // {campaign_id: {inv, cliques, fatGads, conv, nome}}
+  for (let i = 1; i < _rawGads.rows.length; i++) {
+    const r = _rawGads.rows[i].c;
+    if (!r || !r[0]) continue;
+    const d = cellDate(r[0]);
+    if (!d || isNaN(d) || d < pStart || d > pEnd) continue;
+    const campId = cellStr(r[1]).trim();
+    const nome   = cellStr(r[2]).trim();
+    if (!campId) continue;
+    if (!gadsMap[campId]) gadsMap[campId] = {inv:0, cliques:0, fatGads:0, conv:0, nome};
+    gadsMap[campId].inv     += cellNum(r[6]);
+    gadsMap[campId].cliques += cellNum(r[4]);
+    gadsMap[campId].fatGads += cellNum(r[8]);
+    gadsMap[campId].conv    += cellNum(r[7]);
+  }
+
+  // ── Agrega Guru por campanha (rppc utm campaign = col 52) ─
+  // col 18 = nome produto (tipo assinatura), col 12 = valor_liquido
+  const guruMap = {}; // {campaign_id: {fatGuru, anual, mensal, anos2, anos3}}
+  const guruByName = {}; // {campaign_name: mesmo objeto} via medium col 53
+  const guruMediumMap = {}; // para renderAdsets
+  for (let i = 1; i < _rawGuru.rows.length; i++) {
+    const r = _rawGuru.rows[i].c;
+    if (!r) continue;
+    const d = cellDate(r[46]);
+    if (!d || isNaN(d) || d < pStart || d > pEnd) continue;
+    const campId = r[52] ? String(r[52].v||'').trim() : '';
+    const medium = (r[53] && String(r[53].v||'').trim()) || (r[62] && String(r[62].v||'').trim()) || '(sem grupo)';
+    const valor  = cellNum(r[12]);
+    const prod   = cellStr(r[18]).toLowerCase();
+    const isAnual      = prod.includes('anual');
+    const isMensal     = prod.includes('mensal');
+    const isAnos2      = prod.includes('2 ano') || prod.includes('2ano');
+    const isAnos3      = prod.includes('3 ano') || prod.includes('3ano');
+    const isBimestral  = prod.includes('bimestral');
+    const isTrimestral = prod.includes('trimestral');
+
+    // Tentar campId via rppc (col 52) ou utm_campaign (col 61)
+    const campIdFinal = campId || (r[61] ? String(r[61].v||'').trim() : '');
+    if (campIdFinal) {
+      if (!guruMap[campIdFinal]) guruMap[campIdFinal] = {fatGuru:0,anual:0,mensal:0,anos2:0,anos3:0,bimestral:0,trimestral:0};
+      guruMap[campIdFinal].fatGuru += valor;
+      if (isAnual)      guruMap[campIdFinal].anual++;
+      if (isMensal)     guruMap[campIdFinal].mensal++;
+      if (isAnos2)      guruMap[campIdFinal].anos2++;
+      if (isAnos3)      guruMap[campIdFinal].anos3++;
+      if (isBimestral)  { guruMap[campIdFinal].bimestral  = (guruMap[campIdFinal].bimestral||0)+1; }
+      if (isTrimestral) { guruMap[campIdFinal].trimestral = (guruMap[campIdFinal].trimestral||0)+1; }
+      // para adsets
+      if (!guruMediumMap[campIdFinal]) guruMediumMap[campIdFinal] = {};
+      if (!guruMediumMap[campIdFinal][medium]) guruMediumMap[campIdFinal][medium] = {fat:0,count:0};
+      guruMediumMap[campIdFinal][medium].fat   += valor;
+      guruMediumMap[campIdFinal][medium].count += 1;
+    }
+  }
+
+  // ── Monta estrutura de campanhas ─────────────────────────
+  // Une gadsMap com guruMap usando o _campData original como dicionário id↔nome
+  const campDict = _campData ? _campData.data : [];
+  const data = [];
+  const usedIds = new Set();
+
+  campDict.forEach(c => {
+    const g = gadsMap[c.id]  || {inv:0,cliques:0,fatGads:0,conv:0,nome:c.nome};
+    const gu = guruMap[c.id]  || {fatGuru:0,anual:0,mensal:0,anos2:0,anos3:0};
+    if (g.inv === 0 && gu.fatGuru === 0) return;
+    usedIds.add(c.id);
+    data.push({
+      id:      c.id,
+      nome:    c.nome,
+      inv:     g.inv,
+      cliques: g.cliques,
+      cpc:     g.cliques > 0 ? g.inv/g.cliques : 0,
+      fatGads: g.fatGads,
+      roasGads:g.inv > 0 ? g.fatGads/g.inv : 0,
+      fatGuru: gu.fatGuru,
+      roasGuru:g.inv > 0 ? gu.fatGuru/g.inv : 0,
+      anual:   gu.anual,
+      mensal:  gu.mensal,
+      anos2:   gu.anos2,
+      anos3:   gu.anos3,
+      cpassin: 0,
+    });
+  });
+
+  const fmtD = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const fakeCamp = {
+    period: { start: fmtD(pStart), end: fmtD(pEnd) },
+    data
+  };
+
+  // Agrega STR-GAds por período para adsets
+  const strData = parseStrGads(_rawStr, pStart, pEnd);
+
+  // Renderiza tudo
+  renderPeriodo(fakeCamp);
+  renderAdsets(strData, fakeCamp, guruMediumMap);
+
+  // Marca badge como período customizado
+  document.getElementById('periodBadge').textContent = `${fmtD(pStart)} – ${fmtD(pEnd)}`;
+  document.getElementById('periodMode') && document.getElementById('periodMode').classList.add('custom');
+
+  // Remove active dos filtros rápidos
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ══════════════════════════════════════════════════════════
+// LOAD ALL
+// ══════════════════════════════════════════════════════════
+async function loadAll() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('errorBox').classList.remove('show');
+  try {
+    const [tCamp, tGeral, tStr, tGuru, tGads] = await Promise.all([
+      fetchGviz(GIDS.campanhas1),
+      fetchGviz(GIDS.geral),
+      fetchGviz(GIDS.strGads),
+      fetchGviz(GIDS.guruAssin),
+      fetchGviz(GIDS.gads),
+    ]);
+
+    const camp  = parseCampanhas(tCamp);
+    const geral = parseGeral(tGeral);
+    _geralData  = geral;
+    _rawStr     = tStr;
+    _rawGuru    = tGuru;
+    _rawGads    = tGads;
+
+    // Descobre data mínima nos dados brutos do GAds, STR-GAds e Guru-Assinaturas
+    let minDate = null;
+    for (let i = 1; i < tGads.rows.length; i++) {
+      const r = tGads.rows[i].c;
+      if (!r || !r[0]) continue;
+      const d = cellDate(r[0]);
+      if (d && !isNaN(d) && d.getFullYear() >= 2024 && (!minDate || d < minDate)) minDate = d;
+    }
+    for (let i = 1; i < tStr.rows.length; i++) {
+      const r = tStr.rows[i].c;
+      if (!r || !r[2]) continue;
+      const d = cellDate(r[2]);
+      if (d && !isNaN(d) && (!minDate || d < minDate)) minDate = d;
+    }
+    for (let i = 1; i < tGuru.rows.length; i++) {
+      const r = tGuru.rows[i].c;
+      if (!r || !r[46]) continue;
+      const d = cellDate(r[46]);
+      if (d && !isNaN(d) && d.getFullYear() >= 2024 && (!minDate || d < minDate)) minDate = d;
+    }
+
+    // Configura o date picker com o range disponível
+    const [d1,m1,y1] = camp.period.start.split('/');
+    const [d2,m2,y2] = camp.period.end.split('/');
+    const pStart = new Date(+y1,+m1-1,+d1);
+    const pEnd   = new Date(+y2,+m2-1,+d2);
+    const earliest = minDate || pStart;
+    const toISO = d => d.toISOString().split('T')[0];
+    const fromEl = document.getElementById('dateFrom');
+    const toEl   = document.getElementById('dateTo');
+    fromEl.min = toISO(earliest);
+    fromEl.max = toISO(pEnd);
+    toEl.min   = toISO(earliest);
+    toEl.max   = toISO(pEnd);
+    fromEl.value = toISO(earliest);
+    toEl.value   = toISO(pEnd);
+
+    const strData = parseStrGads(tStr, pStart, pEnd);
+    const guruMediums = parseGuruMediums(tGuru, pStart, pEnd);
+    renderPeriodo(camp);
+    renderHistorico(geral, camp);
+    renderAdsets(strData, camp, guruMediums);
+
+    const now = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    document.getElementById('lastUpdate').textContent = `Atualizado em ${now}`;
+    document.getElementById('footerSource').textContent = `Fonte: Google Sheets · ${now}`;
+  } catch(err) {
+    document.getElementById('errorBox').classList.add('show');
+    document.getElementById('errorBox').textContent = `Erro ao carregar: ${err.message}. Verifique se a planilha está pública.`;
+    console.error(err);
+  } finally {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+}
+
+loadAll();
+</script>
+</body>
+</html>
