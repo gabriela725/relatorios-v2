@@ -20,4 +20,37 @@ h1{font-family:'DM Serif Display',serif;font-size:2rem;color:#1a3a2a;margin-bott
 .card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;}
 .card-icon.green{background:#e8f4ee;}
 .card-icon.gold{background:#f5e9c0;}
-.card-name{font-size:1.1rem;font-weight:600;color:#1a
+.card-name{font-size:1.1rem;font-weight:600;color:#1a1a1a;}
+.card-desc{font-size:12px;color:#6b7280;line-height:1.5;}
+.card-tag{display:inline-flex;align-items:center;gap:4px;background:#e8f4ee;color:#1a4a3a;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;width:fit-content;}
+.add-card{background:#f5f3ee;border:2px dashed #e0dbd0;border-radius:14px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9ca3af;text-align:center;min-height:160px;}
+footer{text-align:center;padding:1.5rem;color:#9ca3af;font-size:11px;border-top:1px solid #e0dbd0;}
+</style>
+</head>
+<body>
+<header><div class="logo">🌿 <em>Bonsai</em> Tráfego Pago · relatórios</div></header>
+<main>
+  <h1>Painel de Relatórios</h1>
+  <p class="sub">Selecione o cliente para visualizar o dashboard de performance.</p>
+  <div class="grid">
+    <a href="./logos/" class="card">
+      <div class="card-icon gold">📚</div>
+      <div class="card-name">Logos BR</div>
+      <div class="card-desc">Dashboard de performance — Google Ads, ROAS, faturamento e campanhas.</div>
+      <div class="card-tag">✓ Ativo</div>
+    </a>
+    <a href="./teashop/" class="card">
+      <div class="card-icon green">🍵</div>
+      <div class="card-name">Tea Shop</div>
+      <div class="card-desc">Dashboard de franquias — Meta Ads, leads, MQL, públicos e criativos.</div>
+      <div class="card-tag">✓ Ativo</div>
+    </a>
+    <div class="add-card">
+      <span style="font-size:2rem">+</span>
+      <p>Novo cliente em breve</p>
+    </div>
+  </div>
+</main>
+<footer>Bonsai Tráfego Pago · Relatórios de Performance</footer>
+</body>
+</html>
